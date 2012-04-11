@@ -1,0 +1,9 @@
+# Testing Requirements
+coverage
+mox
+nose
+pep8
+pylint
+
+# Docs Requirements
+sphinx
