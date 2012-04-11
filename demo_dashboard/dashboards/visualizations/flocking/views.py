@@ -32,6 +32,9 @@ class IndexView(tables.DataTableView):
             self.correlate_users(instances)
             self.calculate_ages(instances)
 
+        instances += instances
+        instances += instances
+
         return instances
 
     def get(self, request, *args, **kwargs):
