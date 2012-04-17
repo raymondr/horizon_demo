@@ -1,24 +1,28 @@
 var w = null,
-    h = 500,
+    h = 450,
     mouse = [null, null],
-    fill = d3.scale.linear().domain([0, 1e4]).range(["brown", "steelblue"]);
+    fill = d3.scale.linear().domain([0, 1e4]).range(["brown", "steelblue"]),
+    project_colors = {};
 
 $(function () {
-  w = $("#vis").width() - 10;
+  w = $("#vis").width() - 5;
 
   // Initialise boids.
   var boids = new Array();
 
   $.ajax({
-    url: window.location,
+    url: window.location + "?json=true",
     dataType: "json",
     success: function (data, textStatus, jqXHR) {
       $.each(data, function (index, obj) {
-        var b = boid().position([Math.random() * w, Math.random() * h])
-                      .velocity([Math.random() * 2 -1, Math.random() * 2 -1])
-                      .maxSpeed(obj.flavor.vcpus / 2)
-                      .desiredSeparation(obj.flavor.ram / 16 + 2);
-        b.instance = obj;
+        var project = obj.tenant.id;
+        if (!project_colors[project]) {
+          project_colors[project] = "hsla(" + Math.random() * 360 + ",100%,50%,.5)";
+        }
+        var b = Boid(obj).position([Math.random() * w, Math.random() * h])
+                         .velocity([Math.random() * 2 - 1, Math.random() * 2 - 1])
+                         .maxSpeed(obj.flavor.vcpus / 2)
+                         .desiredSeparation(obj.flavor.ram / 16 + 2);
         boids.push(b);
       });
       init_flocking();
@@ -37,54 +41,51 @@ $(function () {
       .append("svg")
         .attr("width", w)
         .attr("height", h)
-        .attr("class", "PiYG")
-        .on("mousemove", function() {
-          var m = d3.mouse(this);
-          mouse[0] = m[0];
-          mouse[1] = m[1];
-        })
-        .on("mouseout", nullGravity);
+        .attr("class", "PiYG");
 
-    /* I don't like this.
-    svg.selectAll("path")
-        .data(d3.geom.voronoi(vertices))
-      .enter().append("path")
-        .attr("class", function(d, i) { return i ? "q" + (i % 9) + "-9" : null; })
-        .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
-    */
+    var circles = svg.selectAll("circle")
+                  .data(vertices)
+                  .enter().append("circle");
 
-    svg.selectAll("circle")
-        .data(vertices)
-      .enter().append("circle")
-        .attr("transform", function(d) { return "translate(" + d + ")"; })
-        .attr("r", 5);
+    var nodes = svg.selectAll("circle")
+                .data(boids)
+                .attr("r", function(boid) {return boid.get_instance().flavor.ram / 16 + 5; });
 
     d3.timer(function() {
       // Update boid positions.
       boids.forEach(function(boid, i) {
-        vertices[i] = boid(boids);
+        if (!boid.pause()) vertices[i] = boid(boids);
       });
 
       // Update circle positions.
       svg.selectAll("circle")
           .data(vertices)
           .attr("transform", function(d) { return "translate(" + d + ")"; });
-
-      // Set the sizes
       svg.selectAll("circle")
-          .data(boids)
-          .attr("r", function(boid) {
-            return boid.instance.flavor.ram / 16 + 5; }
-          );
-
-      /* I don't like this either.
-      // Update voronoi diagram.
-      svg.selectAll("path")
-          .data(d3.geom.voronoi(vertices))
-          .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
-          .style("fill", function(d) { return fill((d3.geom.polygon(d).area())); });
-      */
-    });
+         .data(boids)
+         .attr("fill", function(boid) {return project_colors[boid.get_instance().tenant.id]; })
+         .on("mouseover", function (boid) {
+            var $this = $(this),
+                instance =  boid.get_instance();
+            $this.popover({
+              'title': instance.name,
+              'content': "<ul>"
+                         + "<li><strong>Host:</strong>&nbsp;<span>" + instance["OS-EXT-SRV-ATTR:host"] + "</span></li>"
+                         + "<li><strong>Project:</strong>&nbsp;<span>" + instance.tenant.name + "</span></li>"
+                         + "<li><strong>User:</strong>&nbsp;<span>" + instance.user.name + "</span></li>"
+                         + "<li><strong>VCPUs:</strong>&nbsp;<span>" + instance.flavor.vcpus + "</span></li>"
+                         + "<li><strong>RAM:</strong>&nbsp;<span>" + instance.flavor.ram + " MB</span></li>"
+                         + "</ul>",
+              'trigger': "manual",
+              'placement': 'top'
+            }).popover("show");
+            boid.pause(true);
+          })
+          .on("mouseout", function (boid) {
+            $(this).popover("hide");
+            boid.pause(false);
+          });
+      });
   }
 
   function nullGravity() {

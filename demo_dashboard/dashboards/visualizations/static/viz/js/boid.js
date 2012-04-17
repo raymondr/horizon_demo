@@ -1,6 +1,6 @@
 // Boid flocking based on http://harry.me/2011/02/17/neat-algorithms---flocking
-var boid = (function() {
-  function boid() {
+var Boid = (function() {
+  function instance_boid(the_instance) {
     var position = [0, 0],
         velocity = [0, 0],
         gravityCenter = null,
@@ -11,8 +11,8 @@ var boid = (function() {
         alignmentWeight = 1,
         cohesionWeight = 1,
         desiredSeparation = 10,
-        // Custom parameters
-        instance = null;
+        instance = the_instance,
+        pause = false;
 
     function boid(neighbors) {
       var accel = flock(neighbors);
@@ -20,7 +20,7 @@ var boid = (function() {
       velocity[0] += accel[0];
       velocity[1] += accel[1];
       if (gravityCenter) {
-        var g = d3_ai_boidGravity(gravityCenter, position, neighborRadius);
+        var g = d3_ai_boidGravity(gravityCenter, positionl, neighborRadius);
         velocity[0] += g[0];
         velocity[1] += g[1];
       }
@@ -45,13 +45,17 @@ var boid = (function() {
         var npos = n.position(),
             d = d3_ai_boidDistance(position, npos);
         if (d > 0) {
-          if (d < desiredSeparation) {
+          if (d < desiredSeparation * 2) {
             var tmp = d3_ai_boidNormalize(d3_ai_boidSubtract(position.slice(), npos));
-            separation[0] += tmp[0] / d;
-            separation[1] += tmp[1] / d;
+            separation[0] += tmp[0];
+            separation[1] += tmp[1];
             separationCount++;
           }
-          if (d < neighborRadius) {
+
+          // Custom forces
+          neighbor_instance = n.get_instance();
+
+          function increase () {
             var nvel = n.velocity();
             alignment[0] += nvel[0];
             alignment[1] += nvel[1];
@@ -59,6 +63,34 @@ var boid = (function() {
             cohesion[0] += npos[0];
             cohesion[1] += npos[1];
             cohesionCount++;
+          }
+
+          function decrease () {
+            var tmp = d3_ai_boidNormalize(d3_ai_boidSubtract(position.slice(), npos));
+            separation[0] += tmp[0] / (d / 2);
+            separation[1] += tmp[1] / (d / 2);
+            separationCount++;
+          }
+
+          // Same project = greater cohesion
+          if (instance.tenant.id === neighbor_instance.tenant.id) {
+            increase();
+          } else {
+            decrease();
+          }
+
+          // Same user = greater cohesion
+          if (instance.user.id === neighbor_instance.user.id) {
+            increase();
+          } else {
+            decrease();
+          }
+
+          // Same flavor = greater cohesion
+          if (instance.user.id === neighbor_instance.user.id) {
+            increase();
+          } else {
+            decrease();
           }
         }
       }
@@ -111,6 +143,16 @@ var boid = (function() {
         steer = [0, 0];
       }
       return steer;
+    }
+
+    boid.set_instance = function(x) {
+      if (!arguments.length) return instance;
+      instance = x;
+      return boid;
+    }
+
+    boid.get_instance = function() {
+      return instance;
     }
 
     boid.position = function(x) {
@@ -170,6 +212,12 @@ var boid = (function() {
     boid.desiredSeparation = function(x) {
       if (!arguments.length) return desiredSeparation;
       desiredSeparation = x;
+      return boid;
+    }
+
+    boid.pause = function (x) {
+      if (!arguments.length) return pause;
+      pause = x;
       return boid;
     }
 
@@ -233,5 +281,5 @@ var boid = (function() {
     return a;
   }
 
-  return boid;
+  return instance_boid;
 })();

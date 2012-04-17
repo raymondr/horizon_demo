@@ -2,7 +2,7 @@ svg {
   display: block;
   border: solid 1px #ccc;
   overflow: hidden;
-  margin: 0 auto;
+  margin: 10px 0;
   border-radius: 5px;
 }
 
@@ -12,6 +12,10 @@ path {
 }
 
 circle {
-  fill: rgba(0, 0, 0, .5);
-  stroke: #fff;
+  stroke: #ddd;
+}
+
+circle:hover{
+  stroke: red;
+  stroke-width: 2px;
 }
