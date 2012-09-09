@@ -7,6 +7,8 @@ from django.utils.translation import ugettext_lazy as _
 from horizon import api
 from horizon import exceptions
 
+from .test_data import json as test_json
+
 
 def correlate_tenants(request, instances):
     # Gather our tenants to correlate against IDs
@@ -60,6 +62,18 @@ def calculate_ages(instances):
         timestamp = time.mktime(dt.timetuple())
         instance._apiresource._info['created'] = timestamp
         instance.age = dt
+
+
+def get_fake_instances_data(request):
+    import json
+    from novaclient.v1_1.servers import Server, ServerManager
+    from horizon.api.nova import Server as HServer
+    instances = [HServer(Server(ServerManager(None), i), request)
+                 for i in json.loads(test_json)]
+    for i in instances:
+        i._loaded = True
+    instances += instances
+    return instances
 
 
 def get_instances_data(request):

@@ -1,5 +1,6 @@
 {% load horizon i18n %}
-{% with components|can_haz_list:user as filtered_components %}
+
+{% with components|has_permissions_on_list:user as filtered_components %}
 {% if filtered_components|length > 1 %}
 <div id="dashboard_switcher" class="dropdown switcher_bar" tabindex='1'>
   <a class="dropdown-toggle" data-toggle="dropdown" href="#dashboard_switcher">

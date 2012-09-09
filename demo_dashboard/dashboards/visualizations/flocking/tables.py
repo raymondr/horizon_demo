@@ -6,19 +6,19 @@ from horizon.dashboards.syspanel.instances.tables import (AdminUpdateRow)
 
 
 def get_tenant_name(instance):
-    return instance.tenant.name
+    return instance._apiresource.tenant["name"]
 
 
 def get_memory(instance):
-    return filesizeformat(instance.flavor.ram * 1024 * 1024)
+    return filesizeformat(instance.flavor["ram"] * 1024 * 1024)
 
 
 def get_vcpus(instance):
-    return instance.flavor.vcpus
+    return instance.flavor["vcpus"]
 
 
 def get_username(instance):
-    return instance.user.name
+    return instance._apiresource.user["name"]
 
 
 class FlockingInstancesTable(tables.DataTable):
@@ -27,7 +27,7 @@ class FlockingInstancesTable(tables.DataTable):
     user = tables.Column(get_username, verbose_name=_("user"))
     vcpus = tables.Column(get_vcpus, verbose_name=_("VCPUs"))
     memory = tables.Column(get_memory, verbose_name=_("Memory"))
-    age = tables.Column('age', verbose_name=_("Age"), filters=(timesince,))
+    #age = tables.Column('age', verbose_name=_("Age"), filters=(timesince,))
 
     class Meta:
         name = "instances"

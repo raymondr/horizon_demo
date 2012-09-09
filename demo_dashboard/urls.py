@@ -1,15 +1,15 @@
-from django.conf import settings
-from django.conf.urls.defaults import url, patterns, include
+from django.conf.urls.defaults import patterns, url, include
 from django.conf.urls.static import static
+from django.conf import settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 import horizon
 
 
 urlpatterns = patterns('',
-    url(r'^$', 'demo_dashboard.views.splash', name='splash'),
-    url(r'', include(horizon.urls)),
-)
+    url(r'^$', 'horizon.views.splash', name='splash'),
+    url(r'^auth/', include('openstack_auth.urls')),
+    url(r'', include(horizon.urls)))
 
 # Development static app and project media serving using the staticfiles app.
 urlpatterns += staticfiles_urlpatterns()

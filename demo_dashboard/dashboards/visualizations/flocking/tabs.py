@@ -30,7 +30,7 @@ class VizTab(tabs.Tab):
     template_name = "visualizations/flocking/_flocking.html"
 
     def get_context_data(self, request):
-        return {}
+        return None
 
 
 class FlockingTabs(tabs.TabGroup):
