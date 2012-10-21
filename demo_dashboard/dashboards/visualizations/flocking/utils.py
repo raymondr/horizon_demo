@@ -4,7 +4,8 @@ from django.utils.dateparse import parse_datetime
 from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import api
+from openstack_dashboard import api
+
 from horizon import exceptions
 
 from .test_data import json as test_json

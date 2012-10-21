@@ -1,24 +1,26 @@
-from django.template.defaultfilters import filesizeformat, timesince
+from django.template.defaultfilters import filesizeformat
 from django.utils.translation import ugettext_lazy as _
 
+from openstack_dashboard.dashboards.admin.instances.tables import \
+        AdminUpdateRow
+
 from horizon import tables
-from horizon.dashboards.syspanel.instances.tables import (AdminUpdateRow)
 
 
 def get_tenant_name(instance):
-    return instance._apiresource.tenant["name"]
+    return instance.tenant.name
 
 
 def get_memory(instance):
-    return filesizeformat(instance.flavor["ram"] * 1024 * 1024)
+    return filesizeformat(instance.flavor.ram * 1024 * 1024)
 
 
 def get_vcpus(instance):
-    return instance.flavor["vcpus"]
+    return instance.flavor.vcpus
 
 
 def get_username(instance):
-    return instance._apiresource.user["name"]
+    return instance.user.name
 
 
 class FlockingInstancesTable(tables.DataTable):

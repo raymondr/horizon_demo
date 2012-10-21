@@ -31,12 +31,11 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 ROOT_URLCONF = 'openstack_dashboard.urls'
 
 HORIZON_CONFIG = {
-    'dashboards': ('nova', 'syspanel', 'visualizations', 'settings',),
-    'default_dashboard': 'nova',
-    'user_home': 'horizon.views.user_home',
+    'dashboards': ('project', 'admin', 'visualizations', 'settings',),
+    'default_dashboard': 'project',
+    'user_home': 'openstack_dashboard.views.get_user_home',
     'ajax_queue_limit': 10,
     'help_url': "http://docs.openstack.org",
-    'customization_module': 'demo_dashboard.overrides',
     'exceptions': {'recoverable': exceptions.RECOVERABLE,
                    'not_found': exceptions.NOT_FOUND,
                    'unauthorized': exceptions.UNAUTHORIZED},
@@ -102,9 +101,9 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'compressor',
     'horizon',
-    'horizon.dashboards.nova',
-    'horizon.dashboards.syspanel',
-    'horizon.dashboards.settings',
+    'openstack_dashboard.dashboards.project',
+    'openstack_dashboard.dashboards.admin',
+    'openstack_dashboard.dashboards.settings',
     'openstack_auth',
     'demo_dashboard.dashboards.visualizations'
 )
