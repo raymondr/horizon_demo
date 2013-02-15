@@ -125,6 +125,7 @@ function run_pep8 {
     echo "PEP8 violations found ($PEP8_COUNT):"
     cat pep8.txt
     echo "Please fix all PEP8 violations before committing."
+    return $PEP8_COUNT
   else
     echo "No violations found. Good job!"
   fi
